@@ -18,7 +18,7 @@
   <meta name="twitter:image" content="./images/like.svg">
   <title>TipFrame</title>
   <link rel="canonical" href="">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f172a'/%3E%3Cpath d='M32 48s-18-10.8-18-24a10 10 0 0 1 18-6 10 10 0 0 1 18 6c0 13.2-18 24-18 24Z' fill='%23f8fafc'/%3E%3C/svg%3E">
+  <link rel="icon" href="./images/like.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./images/like.svg">
   <script>
     (function () {
@@ -31,90 +31,112 @@
       }
     }());
   </script>
-  <link rel="preload" as="image" href="./images/alipay-qr.jpg">
-  <link rel="preload" as="image" href="./images/wechat-qr.jpg">
+  <link rel="stylesheet" href="./fonts.css">
   <link rel="stylesheet" href="./donate.css">
 </head>
 
 <body>
   <main class="page-shell page-shell--buttons">
-    <button class="theme-toggle" type="button" aria-label="切换深浅色主题" aria-pressed="false">
-      <span class="theme-toggle__icon" aria-hidden="true"></span>
-      <span class="theme-toggle__label">深色模式</span>
-    </button>
-
-    <div class="page-copy" aria-label="打赏说明">
-      <p class="page-copy__eyebrow">TipFrame</p>
-      <h1>如果这个项目帮到了你</h1>
-      <p>可以用你习惯的方式支持一下维护。</p>
-    </div>
-
-    <section id="methods" class="payment-grid" role="group" aria-label="支付方式">
-      <a class="payment-item payment-button--paypal" href="#" target="_blank" rel="noreferrer noopener" aria-label="PayPal 捐赠 / PayPal donate" data-method="paypal">
-        <span class="payment-icon" aria-hidden="true"></span>
-        <span class="payment-label">PayPal</span>
+    <header class="site-header">
+      <a class="brand" href="./" data-i18n-aria-label="labels.brandHome">
+        <svg class="brand__mark" viewBox="0 0 512 512" aria-hidden="true">
+          <rect class="brand__tile" x="32" y="32" width="448" height="448" rx="144"></rect>
+          <path class="brand__heart" d="M256 396S96 305 96 180c0-54.1 43.9-98 98-98 27.2 0 48.4 11.2 62 30 13.6-18.8 34.8-30 62-30 54.1 0 98 43.9 98 98 0 125-160 216-160 216Z"></path>
+          <path class="brand__glint" d="M155 122c12.5-12.5 28.3-19.8 45.1-21"></path>
+        </svg>
+        <span>TipFrame</span>
       </a>
-
-      <button class="payment-item payment-item--button payment-button--alipay" type="button" data-method="alipay" aria-label="支付宝 / Alipay 二维码">
-        <span class="payment-icon" aria-hidden="true"></span>
-        <span class="payment-label">Alipay</span>
+      <button class="theme-toggle" type="button" data-i18n-aria-label="labels.themeToggle" aria-pressed="false">
+        <span class="theme-toggle__icon" aria-hidden="true"></span>
+        <span class="theme-toggle__label">深色模式</span>
       </button>
+    </header>
 
-      <button class="payment-item payment-item--button payment-button--wechat" type="button" data-method="wechat" aria-label="微信支付 / WeChat Pay 二维码">
-        <span class="payment-icon" aria-hidden="true"></span>
-        <span class="payment-label">WeChat</span>
-      </button>
+    <section class="support-card" data-i18n-aria-label="labels.supportCard">
+      <div class="support-card__intro page-copy" data-i18n-aria-label="labels.supportDescription">
+        <p class="page-copy__eyebrow">TipFrame / Support</p>
+        <h1>如果这个项目帮到了你</h1>
+        <p>每一份支持，都让维护和改进得以继续。</p>
+      </div>
+
+      <div class="support-card__actions">
+        <div class="support-card__label">
+          <span aria-hidden="true"></span>
+          <p data-i18n="labels.selectMethod">选择一种方式</p>
+        </div>
+        <section id="methods" class="payment-grid" role="group" data-i18n-aria-label="labels.paymentMethods">
+          <a class="payment-item payment-button--paypal" href="#" target="_blank" rel="noreferrer noopener" aria-label="PayPal 捐赠 / PayPal donate" data-method="paypal">
+            <span class="payment-icon" aria-hidden="true"></span>
+            <span class="payment-label">PayPal</span>
+            <span class="payment-item__arrow" aria-hidden="true">↗</span>
+          </a>
+
+          <button class="payment-item payment-item--button payment-button--alipay" type="button" data-method="alipay" aria-label="支付宝 / Alipay 二维码">
+            <span class="payment-icon" aria-hidden="true"></span>
+            <span class="payment-label">Alipay</span>
+            <span class="payment-item__arrow" aria-hidden="true">↗</span>
+          </button>
+
+          <button class="payment-item payment-item--button payment-button--wechat" type="button" data-method="wechat" aria-label="微信支付 / WeChat Pay 二维码">
+            <span class="payment-icon" aria-hidden="true"></span>
+            <span class="payment-label">WeChat</span>
+            <span class="payment-item__arrow" aria-hidden="true">↗</span>
+          </button>
+        </section>
+        <p class="payment-empty" role="status" aria-live="polite" hidden data-i18n="labels.noMethods">暂无可用支付方式</p>
+        <p class="support-card__footnote" data-i18n="labels.safePayment">安全跳转或扫码完成支付</p>
+      </div>
     </section>
 
-    <button class="embed-builder-toggle" type="button" aria-expanded="false" aria-controls="embed-builder">生成嵌入代码</button>
+    <button class="embed-builder-toggle" type="button" aria-expanded="false" aria-controls="embed-builder" data-i18n="labels.buildEmbedCode">生成嵌入代码</button>
 
-    <section class="embed-builder" id="embed-builder" aria-label="生成嵌入代码" hidden>
+    <section class="embed-builder" id="embed-builder" data-i18n-aria-label="labels.embedBuilder" hidden>
       <div class="embed-builder__header">
         <p class="embed-builder__eyebrow">Embed</p>
-        <h2>生成嵌入代码</h2>
+        <h2 data-i18n="labels.embedBuilder">生成嵌入代码</h2>
       </div>
       <div class="embed-builder__controls">
-        <label>主题
+        <label><span data-i18n="labels.theme">主题</span>
           <select name="embed-theme">
-            <option value="light">浅色</option>
-            <option value="dark" selected>深色</option>
+            <option value="light" data-i18n="labels.light">浅色</option>
+            <option value="dark" selected data-i18n="labels.dark">深色</option>
           </select>
         </label>
-        <label>模式
+        <label><span data-i18n="labels.mode">模式</span>
           <select name="embed-type">
-            <option value="compact">紧凑</option>
-            <option value="full">完整</option>
-            <option value="card">卡片</option>
+            <option value="compact" data-i18n="labels.compact">紧凑</option>
+            <option value="full" data-i18n="labels.full">完整</option>
+            <option value="card" data-i18n="labels.card">卡片</option>
           </select>
         </label>
-        <label>样式
+        <label><span data-i18n="labels.style">样式</span>
           <select name="embed-style">
-            <option value="glass">玻璃拟态</option>
-            <option value="minimal" selected>极简</option>
-            <option value="mono">黑白极简</option>
+            <option value="glass" data-i18n="labels.glass">玻璃拟态</option>
+            <option value="minimal" selected data-i18n="labels.minimal">极简</option>
+            <option value="mono" data-i18n="labels.mono">黑白极简</option>
           </select>
         </label>
-        <label>尺寸
+        <label><span data-i18n="labels.size">尺寸</span>
           <select name="embed-size">
-            <option value="sm">小</option>
-            <option value="md" selected>中</option>
-            <option value="lg">大</option>
+            <option value="sm" data-i18n="labels.small">小</option>
+            <option value="md" selected data-i18n="labels.medium">中</option>
+            <option value="lg" data-i18n="labels.large">大</option>
           </select>
         </label>
       </div>
       <fieldset class="embed-builder__methods">
-        <legend>支付方式</legend>
+        <legend data-i18n="labels.paymentMethods">支付方式</legend>
         <label><input type="checkbox" name="embed-methods" value="paypal" checked> PayPal</label>
         <label><input type="checkbox" name="embed-methods" value="alipay" checked> Alipay</label>
         <label><input type="checkbox" name="embed-methods" value="wechat" checked> WeChat</label>
       </fieldset>
       <textarea class="embed-builder__output" rows="5" readonly></textarea>
-      <button class="embed-builder__copy" type="button">复制代码</button>
+      <button class="embed-builder__copy" type="button" data-i18n="labels.copy">复制代码</button>
     </section>
   </main>
 
-  <section class="qr-modal" aria-hidden="true" aria-label="二维码弹窗">
-    <button class="qr-modal__backdrop" type="button" aria-label="关闭二维码"></button>
+  <section class="qr-modal" aria-hidden="true" data-i18n-aria-label="labels.qrDialog">
+    <button class="qr-modal__backdrop" type="button" aria-label="关闭二维码" data-i18n-aria-label="labels.closeQr"></button>
     <div class="qr-modal__card" role="dialog" aria-modal="true" aria-labelledby="qr-title" aria-describedby="qr-hint qr-caption">
       <div class="qr-modal__bar">
         <span class="qr-modal__handle"></span>
@@ -124,16 +146,19 @@
           <p class="qr-modal__eyebrow">扫码支持</p>
           <h2 id="qr-title">二维码</h2>
         </div>
-        <button class="qr-modal__close" type="button" aria-label="关闭二维码">关闭</button>
+          <button class="qr-modal__close" type="button" data-i18n="labels.close" data-i18n-aria-label="labels.closeQr">关闭</button>
       </div>
-      <p class="qr-modal__hint" id="qr-hint">长按可保存二维码</p>
+      <p class="qr-modal__hint" id="qr-hint">长按可保存二维码<span class="qr-modal__loading" aria-hidden="true" data-i18n="labels.loading">，正在加载...</span></p>
       <div class="qr-modal__skeleton" aria-hidden="true"></div>
-      <img class="qr-modal__image" alt="二维码" src="" loading="lazy">
+      <img class="qr-modal__image" alt="二维码" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" loading="lazy">
       <p class="qr-modal__status" aria-live="polite"></p>
       <p class="qr-modal__caption" id="qr-caption">点击空白处或按 Esc 键关闭</p>
     </div>
   </section>
 
+  <p class="sr-only" id="qr-live" role="status" aria-live="polite" aria-atomic="true"></p>
+
+  <script src="./version.js"></script>
   <script src="./config.js"></script>
   <script src="./donate.js" defer></script>
 </body>

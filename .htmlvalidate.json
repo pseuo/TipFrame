@@ -1,0 +1,11 @@
+{
+  "extends": ["html-validate:recommended"],
+  "rules": {
+    "aria-label-misuse": "off",
+    "attribute-allowed-values": "off",
+    "form-dup-name": "off",
+    "hidden-focusable": "off",
+    "no-deprecated-attr": "off",
+    "no-utf8-bom": "off"
+  }
+}

@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
 	var body = document.body;
+	var pageShell = document.querySelector('.page-shell');
 	var isEmbedded = false;
 	var searchParams = new URLSearchParams(window.location.search);
 	var themeToggle = document.querySelector('.theme-toggle');
@@ -10,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	var generatorToggle = document.querySelector('.embed-builder-toggle');
 	var generatorOutput = document.querySelector('.embed-builder__output');
 	var generatorCopy = document.querySelector('.embed-builder__copy');
+	var paymentEmpty = document.querySelector('.payment-empty');
 	var overlay = document.querySelector('.qr-modal');
 	var card = document.querySelector('.qr-modal__card');
 	var image = document.querySelector('.qr-modal__image');
@@ -18,11 +20,13 @@ document.addEventListener('DOMContentLoaded', function () {
 	var hint = document.getElementById('qr-hint');
 	var caption = document.getElementById('qr-caption');
 	var closeButton = document.querySelector('.qr-modal__close');
+	var liveRegion = document.getElementById('qr-live');
 	var methodButtons = document.querySelectorAll('[data-method]');
 	var lastTrigger = null;
+	var focusBeforeModal = null;
+	var backgroundAriaHidden = null;
 	var closeTimer = null;
 	var resizeObserver = null;
-	var qrCache = {};
 	var themeStorageKey = 'tipframe-theme';
 	var donationConfig = {
 		page: {
@@ -53,7 +57,8 @@ document.addEventListener('DOMContentLoaded', function () {
 		},
 		security: {
 			allowUrlOverrides: true,
-			lockedProfile: ''
+			lockedProfile: '',
+			parentOrigin: ''
 		},
 		seo: {
 			robots: 'index,follow'
@@ -69,7 +74,6 @@ document.addEventListener('DOMContentLoaded', function () {
 				href: 'https://www.paypal.me/7fffan',
 				label: 'PayPal',
 				ariaLabel: 'PayPal 捐赠 / PayPal donate',
-				iconLabel: 'PayPal',
 				icon: './images/paypal-xiao.png'
 			},
 			alipay: {
@@ -79,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function () {
 				title: 'Alipay',
 				label: 'Alipay',
 				ariaLabel: '支付宝 / Alipay 二维码',
-				iconLabel: 'Alipay',
 				icon: './images/alipay-xiao.png'
 			},
 			wechat: {
@@ -89,12 +92,11 @@ document.addEventListener('DOMContentLoaded', function () {
 				title: 'WeChat Pay',
 				label: 'WeChat',
 				ariaLabel: '微信支付 / WeChat Pay 二维码',
-				iconLabel: 'WeChat',
 				icon: './images/wechat-xiao.png'
 			}
 		}
 	};
-	var languageText = {
+	var i18n = {
 		'zh-CN': {
 			page: donationConfig.page,
 			modal: donationConfig.modal,
@@ -102,7 +104,41 @@ document.addEventListener('DOMContentLoaded', function () {
 			labels: {
 				copy: '复制代码',
 				copied: '已复制',
-				unavailable: '不可用'
+				unavailable: '不可用',
+				brandHome: 'TipFrame 首页',
+				themeToggle: '切换深浅色主题',
+				supportCard: '支持项目',
+				supportDescription: '打赏说明',
+				selectMethod: '选择一种方式',
+				paymentMethods: '支付方式',
+				safePayment: '安全跳转或扫码完成支付',
+				noMethods: '暂无可用支付方式',
+				buildEmbedCode: '生成嵌入代码',
+				hideEmbedCode: '隐藏嵌入代码',
+				embedBuilder: '生成嵌入代码',
+				theme: '主题',
+				light: '浅色',
+				dark: '深色',
+				mode: '模式',
+				compact: '紧凑',
+				full: '完整',
+				card: '卡片',
+				style: '样式',
+				glass: '玻璃拟态',
+				minimal: '极简',
+				mono: '黑白极简',
+				size: '尺寸',
+				small: '小',
+				medium: '中',
+				large: '大',
+				close: '关闭',
+				closeQr: '关闭二维码',
+				qrDialog: '二维码弹窗',
+				qrCode: '二维码',
+				loading: '，正在加载...',
+				qrOpening: '已打开 {method} 二维码弹窗。',
+				qrLoaded: '{method} 二维码已加载。',
+				qrClosed: '二维码弹窗已关闭。'
 			}
 		},
 		en: {
@@ -128,11 +164,46 @@ document.addEventListener('DOMContentLoaded', function () {
 			labels: {
 				copy: 'Copy code',
 				copied: 'Copied',
-				unavailable: 'Unavailable'
+				unavailable: 'Unavailable',
+				brandHome: 'TipFrame home',
+				themeToggle: 'Toggle color theme',
+				supportCard: 'Support this project',
+				supportDescription: 'Support details',
+				selectMethod: 'Choose a payment method',
+				paymentMethods: 'Payment methods',
+				safePayment: 'Continue securely or scan a QR code to pay',
+				noMethods: 'No payment methods are currently available.',
+				buildEmbedCode: 'Generate embed code',
+				hideEmbedCode: 'Hide embed code',
+				embedBuilder: 'Generate embed code',
+				theme: 'Theme',
+				light: 'Light',
+				dark: 'Dark',
+				mode: 'Mode',
+				compact: 'Compact',
+				full: 'Full',
+				card: 'Card',
+				style: 'Style',
+				glass: 'Glass',
+				minimal: 'Minimal',
+				mono: 'Monochrome',
+				size: 'Size',
+				small: 'Small',
+				medium: 'Medium',
+				large: 'Large',
+				close: 'Close',
+				closeQr: 'Close QR code',
+				qrDialog: 'QR code dialog',
+				qrCode: 'QR code',
+				loading: ' Loading...',
+				qrOpening: '{method} QR code dialog opened.',
+				qrLoaded: '{method} QR code loaded.',
+				qrClosed: 'QR code dialog closed.'
 			}
 		}
 	};
-	var activeMethods = donationConfig.display.methods.slice();
+	var defaultI18n = JSON.parse(JSON.stringify(i18n));
+	var activeMethods = [];
 	var activeLang = 'zh-CN';
 
 	function isPlainObject(value) {
@@ -153,13 +224,112 @@ document.addEventListener('DOMContentLoaded', function () {
 		return target;
 	}
 
-	mergeConfig(donationConfig, window.TipFrameConfig);
-	if (getActiveProfile() && donationConfig.profiles && donationConfig.profiles[getActiveProfile()]) {
-		mergeConfig(donationConfig, donationConfig.profiles[getActiveProfile()]);
+	function reportConfigError(message) {
+		if (window.console && window.console.warn) {
+			window.console.warn('[TipFrame] ' + message);
+		}
 	}
-	mergeConfig(languageText['zh-CN'].page, donationConfig.page);
-	mergeConfig(languageText['zh-CN'].modal, donationConfig.modal);
-	mergeConfig(languageText['zh-CN'].themeLabels, donationConfig.themeLabels);
+
+	function isHttpsUrl(value) {
+		try {
+			return new URL(value).protocol === 'https:';
+		} catch (error) {
+			return false;
+		}
+	}
+
+	function validateTextConfig(target, fallback, path) {
+		Object.keys(fallback).forEach(function (key) {
+			var value = target[key];
+			var fallbackValue = fallback[key];
+
+			if (isPlainObject(fallbackValue)) {
+				if (!isPlainObject(value)) {
+					reportConfigError(path + '.' + key + ' must be an object.');
+					target[key] = JSON.parse(JSON.stringify(fallbackValue));
+				}
+				validateTextConfig(target[key], fallbackValue, path + '.' + key);
+			} else if (typeof value !== 'string' || !value.trim() || value.length > 300) {
+				reportConfigError(path + '.' + key + ' must be a non-empty string up to 300 characters.');
+				target[key] = fallbackValue;
+			}
+		});
+	}
+
+	function validateConfig() {
+		if (!isPlainObject(donationConfig.security)) {
+			reportConfigError('security must be an object.');
+			donationConfig.security = { allowUrlOverrides: true, lockedProfile: '', parentOrigin: '' };
+		}
+
+		if (!isPlainObject(donationConfig.display)) {
+			reportConfigError('display must be an object.');
+			donationConfig.display = { mode: 'auto', style: 'glass', layout: 'horizontal', size: 'md', motion: true, methods: [] };
+		}
+		if (!Array.isArray(donationConfig.display.methods)) {
+			reportConfigError('display.methods must be an array.');
+			donationConfig.display.methods = [];
+		}
+
+		if (!isPlainObject(donationConfig.payments)) {
+			reportConfigError('payments must be an object.');
+			donationConfig.payments = {};
+		}
+
+		donationConfig.display.methods = donationConfig.display.methods.filter(function (method, index, methods) {
+			var payment = donationConfig.payments[method];
+			var valid = typeof method === 'string' && isPlainObject(payment) && methods.indexOf(method) === index;
+
+			if (!valid) reportConfigError('display.methods contains an unknown or duplicate payment method.');
+			return valid;
+		});
+
+		Object.keys(donationConfig.payments).forEach(function (method) {
+			var payment = donationConfig.payments[method];
+
+			if (!isPlainObject(payment)) {
+				reportConfigError('payments.' + method + ' must be an object.');
+				delete donationConfig.payments[method];
+				return;
+			}
+			if (payment.kind !== 'link' && payment.kind !== 'qr') {
+				reportConfigError('payments.' + method + '.kind must be "link" or "qr".');
+				payment.enabled = false;
+				return;
+			}
+			if (payment.kind === 'link' && !isHttpsUrl(payment.href)) {
+				reportConfigError('payments.' + method + '.href must use HTTPS.');
+				payment.enabled = false;
+			}
+			if (payment.kind === 'qr' && (typeof payment.qr !== 'string' || !payment.qr.trim())) {
+				reportConfigError('payments.' + method + '.qr must be a non-empty path.');
+				payment.enabled = false;
+			}
+		});
+	}
+
+	mergeConfig(donationConfig, window.TipFrameConfig);
+	if (!isPlainObject(donationConfig.security)) {
+		donationConfig.security = { allowUrlOverrides: true, lockedProfile: '', parentOrigin: '' };
+	}
+	var activeProfile = getActiveProfile();
+	if (activeProfile) {
+		if (!isPlainObject(donationConfig.profiles) || !isPlainObject(donationConfig.profiles[activeProfile])) {
+			reportConfigError('Profile "' + activeProfile + '" does not exist.');
+		} else {
+			mergeConfig(donationConfig, donationConfig.profiles[activeProfile]);
+		}
+	}
+	validateConfig();
+	i18n = JSON.parse(JSON.stringify(defaultI18n));
+	mergeConfig(i18n['zh-CN'].page, donationConfig.page);
+	mergeConfig(i18n['zh-CN'].modal, donationConfig.modal);
+	mergeConfig(i18n['zh-CN'].themeLabels, donationConfig.themeLabels);
+	mergeConfig(i18n, donationConfig.i18n);
+	if (!isPlainObject(i18n['zh-CN'])) i18n['zh-CN'] = JSON.parse(JSON.stringify(defaultI18n['zh-CN']));
+	if (!isPlainObject(i18n.en)) i18n.en = JSON.parse(JSON.stringify(defaultI18n.en));
+	validateTextConfig(i18n['zh-CN'], defaultI18n['zh-CN'], 'i18n.zh-CN');
+	validateTextConfig(i18n.en, defaultI18n.en, 'i18n.en');
 
 	try {
 		isEmbedded = window.self !== window.top;
@@ -199,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			return donationConfig.security.lockedProfile;
 		}
 
-		return isUrlOverrideAllowed() ? getParam('profile') : '';
+		return window.TipFrameEntryProfile || (isUrlOverrideAllowed() ? getParam('profile') : '');
 	}
 
 	function hexToRgb(hex) {
@@ -251,10 +421,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	function getLanguage() {
 		var lang = getParam('lang');
-		var browserLang = (navigator.language || '').toLowerCase();
 
 		if (lang === 'en' || lang === 'zh-CN') return lang;
-		return browserLang.indexOf('zh') === 0 ? 'zh-CN' : 'en';
+		return 'zh-CN';
 	}
 
 	function getOpenMethod() {
@@ -284,9 +453,11 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 
 	function getConfiguredText(name, fallback) {
-		return getOverrideParam(name) || getOverrideParam(name.replace(/[A-Z]/g, function (letter) {
+		var value = getOverrideParam(name) || getOverrideParam(name.replace(/[A-Z]/g, function (letter) {
 			return '-' + letter.toLowerCase();
-		})) || fallback;
+		}));
+
+		return value && value.length <= 300 ? value : fallback;
 	}
 
 	function shouldNoindex() {
@@ -309,10 +480,37 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	}
 
+	function getLocalizedText(langConfig, path) {
+		return path.split('.').reduce(function (value, key) {
+			return value && value[key];
+		}, langConfig) || '';
+	}
+
+	function applyLocalizedElements(langConfig) {
+		document.querySelectorAll('[data-i18n]').forEach(function (element) {
+			var value = getLocalizedText(langConfig, element.getAttribute('data-i18n'));
+			if (value) element.textContent = value;
+		});
+		document.querySelectorAll('[data-i18n-aria-label]').forEach(function (element) {
+			var value = getLocalizedText(langConfig, element.getAttribute('data-i18n-aria-label'));
+			if (value) element.setAttribute('aria-label', value);
+		});
+	}
+
+	function interpolate(text, values) {
+		return text.replace(/\{(\w+)\}/g, function (match, key) {
+			return values[key] || '';
+		});
+	}
+
+	function announce(message) {
+		if (liveRegion) liveRegion.textContent = message || '';
+	}
+
 	function applyCopy() {
 		var modalEyebrow = document.querySelector('.qr-modal__eyebrow');
-		var langConfig = languageText[activeLang] || languageText['zh-CN'];
-		var documentTitle = getConfiguredText('documentTitle', donationConfig.page.documentTitle);
+		var langConfig = i18n[activeLang] || i18n['zh-CN'];
+		var documentTitle = getConfiguredText('documentTitle', langConfig.page.documentTitle);
 		var eyebrowText = getConfiguredText('eyebrow', langConfig.page.eyebrow);
 		var titleText = getConfiguredText('title', langConfig.page.title);
 		var descriptionText = getConfiguredText('desc', getConfiguredText('description', langConfig.page.description));
@@ -320,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		var hintText = getConfiguredText('hint', defaultHint);
 		var captionText = getConfiguredText('caption', langConfig.modal.caption);
 		var modalEyebrowText = getConfiguredText('modalEyebrow', langConfig.modal.eyebrow);
-		var shareImage = getConfiguredText('image', donationConfig.page.shareImage);
+		var shareImage = getConfiguredText('image', langConfig.page.shareImage);
 		var canonicalUrl = getCanonicalUrl();
 
 		document.title = documentTitle;
@@ -328,10 +526,10 @@ document.addEventListener('DOMContentLoaded', function () {
 		if (pageEyebrow) pageEyebrow.textContent = eyebrowText;
 		if (pageTitle) pageTitle.textContent = titleText;
 		if (pageDescription) pageDescription.textContent = descriptionText;
-		if (hint) hint.textContent = hintText;
+		if (hint && hint.firstChild) hint.firstChild.nodeValue = hintText;
 		if (caption) caption.textContent = captionText;
 		if (modalEyebrow) modalEyebrow.textContent = modalEyebrowText;
-		if (generatorCopy) generatorCopy.textContent = langConfig.labels.copy;
+		applyLocalizedElements(langConfig);
 		setMeta('description', descriptionText);
 		setMeta('property', 'og:title', titleText);
 		setMeta('property', 'og:description', descriptionText);
@@ -402,7 +600,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	function applyTheme(theme) {
 		var nextTheme = theme === 'dark' ? 'dark' : 'light';
 		var themeLabel = themeToggle ? themeToggle.querySelector('.theme-toggle__label') : null;
-		var langConfig = languageText[activeLang] || languageText['zh-CN'];
+		var langConfig = i18n[activeLang] || i18n['zh-CN'];
 
 		document.documentElement.dataset.theme = nextTheme;
 		if (themeToggle) {
@@ -433,21 +631,34 @@ document.addEventListener('DOMContentLoaded', function () {
 		return Math.ceil(cardRect.height + 48);
 	}
 
+	function getParentOrigin() {
+		var configuredOrigin = donationConfig.security && donationConfig.security.parentOrigin;
+
+		if (typeof configuredOrigin === 'string' && isHttpsUrl(configuredOrigin)) {
+			return new URL(configuredOrigin).origin;
+		}
+		try {
+			return document.referrer ? new URL(document.referrer).origin : window.location.origin;
+		} catch (error) {
+			return window.location.origin;
+		}
+	}
+
 	function syncEmbeddedHeight() {
 		if (!isEmbedded) return;
 
-		var height = Math.max(getContentHeight(), getModalHeight());
-		if (!height) return;
+		var height = Math.max(40, Math.min(1000, Math.max(getContentHeight(), getModalHeight())));
+		var parentOrigin = getParentOrigin();
 
 		try {
 			if (window.frameElement && window.frameElement.tagName === 'IFRAME') {
 				window.frameElement.style.height = height + 'px';
 			} else {
-				window.parent.postMessage({ type: 'tipframe:resize', height: height }, '*');
+				window.parent.postMessage({ type: 'tipframe:resize', height: height }, parentOrigin);
 			}
 		} catch (error) {
 			try {
-				window.parent.postMessage({ type: 'tipframe:resize', height: height }, '*');
+				window.parent.postMessage({ type: 'tipframe:resize', height: height }, parentOrigin);
 			} catch (postMessageError) {
 			}
 		}
@@ -465,23 +676,36 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 
 	function setErrorState(message) {
+		var langConfig = i18n[activeLang] || i18n['zh-CN'];
+
 		overlay.classList.add('is-error');
-		setStatus(message || donationConfig.modal.error);
+		setStatus(message || langConfig.modal.error);
+	}
+
+	function updatePaymentEmptyState() {
+		var hasAvailableMethod = Array.prototype.some.call(methodButtons, function (button) {
+			return !button.hidden && !button.disabled;
+		});
+
+		if (paymentEmpty) paymentEmpty.hidden = hasAvailableMethod;
 	}
 
 	function markQrUnavailable(button) {
-		var langConfig = languageText[activeLang] || languageText['zh-CN'];
+		var langConfig = i18n[activeLang] || i18n['zh-CN'];
 		var unavailableText = langConfig.modal.unavailable;
+		var wasUnavailable;
 
 		if (!button) return;
 
+		wasUnavailable = button.classList.contains('is-unavailable');
 		button.classList.add('is-unavailable');
 		button.disabled = true;
 		button.setAttribute('aria-disabled', 'true');
 		button.setAttribute('title', unavailableText);
-		if (button.querySelector('.payment-label')) {
+		if (!wasUnavailable && button.querySelector('.payment-label')) {
 			button.querySelector('.payment-label').textContent += ' · ' + unavailableText;
 		}
+		updatePaymentEmptyState();
 	}
 
 	function precheckQr(button, src) {
@@ -492,7 +716,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		var checkImage = new Image();
 		checkImage.onload = function () {
-			preloadQr(src);
+			updatePaymentEmptyState();
 		};
 		checkImage.onerror = function () {
 			markQrUnavailable(button);
@@ -511,15 +735,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		var selectedMethods = Array.prototype.slice.call(generator.querySelectorAll('[name="embed-methods"]:checked')).map(function (input) {
 			return input.value;
 		}).join(',');
-		var generatedUrl = new URL(baseUrl);
-
-		generatedUrl.searchParams.set('embed', '1');
-		generatedUrl.searchParams.set('type', selectedType);
-		generatedUrl.searchParams.set('theme', selectedTheme);
-		generatedUrl.searchParams.set('size', selectedSize);
-		generatedUrl.searchParams.set('style', selectedStyle);
-		if (selectedMethods) generatedUrl.searchParams.set('methods', selectedMethods);
-
 		return '<div data-tipframe data-src="' + baseUrl + '" data-type="' + selectedType + '" data-theme="' + selectedTheme + '" data-size="' + selectedSize + '" data-style="' + selectedStyle + '" data-methods="' + selectedMethods + '"></div>\n<script src="' + scriptUrl + '"><\/script>';
 	}
 
@@ -538,7 +753,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 				generator.hidden = !willOpen;
 				generatorToggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-				generatorToggle.textContent = willOpen ? '隐藏嵌入代码' : '生成嵌入代码';
+				generatorToggle.textContent = willOpen ? (i18n[activeLang] || i18n['zh-CN']).labels.hideEmbedCode : (i18n[activeLang] || i18n['zh-CN']).labels.buildEmbedCode;
 				if (willOpen) {
 					updateEmbedCode();
 				}
@@ -549,7 +764,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		generator.addEventListener('change', updateEmbedCode);
 		if (generatorCopy) {
 			generatorCopy.addEventListener('click', function () {
-				var langConfig = languageText[activeLang] || languageText['zh-CN'];
+				var langConfig = i18n[activeLang] || i18n['zh-CN'];
 				generatorOutput.select();
 				if (navigator.clipboard && navigator.clipboard.writeText) {
 					navigator.clipboard.writeText(generatorOutput.value);
@@ -580,19 +795,51 @@ document.addEventListener('DOMContentLoaded', function () {
 		}, 420);
 	}
 
-	function preloadQr(src) {
-		if (!src || qrCache[src]) return;
+	function setBackgroundInert(isInert) {
+		if (!pageShell) return;
 
-		qrCache[src] = new Image();
-		qrCache[src].src = src;
+		if (isInert) {
+			backgroundAriaHidden = pageShell.getAttribute('aria-hidden');
+			pageShell.inert = true;
+			pageShell.setAttribute('aria-hidden', 'true');
+			return;
+		}
+
+		pageShell.inert = false;
+		if (backgroundAriaHidden === null) {
+			pageShell.removeAttribute('aria-hidden');
+		} else {
+			pageShell.setAttribute('aria-hidden', backgroundAriaHidden);
+		}
+		backgroundAriaHidden = null;
+	}
+
+	function getDialogFocusableElements() {
+		return Array.prototype.filter.call(card.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'), function (element) {
+			return !element.hidden && element.getClientRects().length > 0;
+		});
+	}
+
+	function restoreFocus() {
+		var target = lastTrigger && lastTrigger.isConnected && !lastTrigger.disabled && !lastTrigger.hidden ? lastTrigger : focusBeforeModal;
+
+		if (target && target.isConnected && typeof target.focus === 'function') {
+			target.focus();
+		}
+		lastTrigger = null;
+		focusBeforeModal = null;
 	}
 
 	function openQr(src, label, trigger) {
+		var langConfig = i18n[activeLang] || i18n['zh-CN'];
+		var methodLabel = label || langConfig.labels.qrCode;
+
 		if (!src) return;
 		window.clearTimeout(closeTimer);
+		focusBeforeModal = document.activeElement && !overlay.contains(document.activeElement) ? document.activeElement : null;
 		lastTrigger = trigger || null;
-		image.alt = (label || '支付') + '二维码';
-		title.textContent = label || '二维码';
+		image.alt = methodLabel + ' ' + langConfig.labels.qrCode;
+		title.textContent = methodLabel;
 		card.style.transition = '';
 		card.style.transform = '';
 		overlay.classList.remove('is-closing');
@@ -601,14 +848,19 @@ document.addEventListener('DOMContentLoaded', function () {
 		overlay.classList.add('is-open');
 		overlay.setAttribute('aria-hidden', 'false');
 		setStatus('');
-		preloadQr(src);
 		image.removeAttribute('src');
 		image.src = src;
-		if (image.complete || (qrCache[src] && qrCache[src].complete)) {
+		if (image.complete) {
 			overlay.classList.remove('is-loading');
 		}
 		body.style.overflow = 'hidden';
-		closeButton.focus();
+		setBackgroundInert(true);
+		window.requestAnimationFrame(function () {
+			window.setTimeout(function () {
+				if (overlay.classList.contains('is-open')) closeButton.focus();
+			}, 50);
+		});
+		announce(interpolate(langConfig.labels.qrOpening, { method: methodLabel }));
 		scheduleHeightSync();
 	}
 
@@ -641,10 +893,9 @@ document.addEventListener('DOMContentLoaded', function () {
 		closeTimer = window.setTimeout(function () {
 			overlay.classList.remove('is-closing');
 			body.style.overflow = '';
-
-			if (lastTrigger && typeof lastTrigger.focus === 'function') {
-				lastTrigger.focus();
-			}
+			setBackgroundInert(false);
+			restoreFocus();
+			announce((i18n[activeLang] || i18n['zh-CN']).labels.qrClosed);
 			scheduleHeightSync();
 		}, 220);
 	}
@@ -700,6 +951,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			precheckQr(button, config.qr);
 		}
 	});
+	updatePaymentEmptyState();
 
 	methodButtons.forEach(function (button) {
 		var method = button.getAttribute('data-method');
@@ -738,6 +990,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	window.addEventListener('load', openDefaultMethod);
 	window.addEventListener('message', function (event) {
 		if (!event || !event.data || event.data.type !== 'tipframe:request-resize') return;
+		if (event.source !== window.parent || event.origin !== getParentOrigin()) return;
 		scheduleHeightSync();
 	});
 
@@ -749,20 +1002,46 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	closeButton.addEventListener('click', closeQr);
 	image.addEventListener('load', function () {
+		var langConfig = i18n[activeLang] || i18n['zh-CN'];
+
 		overlay.classList.remove('is-loading');
 		overlay.classList.remove('is-error');
 		setStatus('');
+		announce(interpolate(langConfig.labels.qrLoaded, { method: title.textContent }));
 		scheduleHeightSync();
 	});
 	image.addEventListener('error', function () {
 		overlay.classList.remove('is-loading');
-		setErrorState(donationConfig.modal.error);
+		setErrorState();
+		announce(status ? status.textContent : '');
 		scheduleHeightSync();
 	});
 
 	document.addEventListener('keydown', function (event) {
-		if (event.key === 'Escape' && overlay.classList.contains('is-open')) {
+		var focusable;
+
+		if (!overlay.classList.contains('is-open')) return;
+		if (event.key === 'Escape') {
 			closeQr();
+			return;
+		}
+		if (event.key !== 'Tab') return;
+
+		focusable = getDialogFocusableElements();
+		if (!focusable.length) {
+			event.preventDefault();
+			card.focus();
+			return;
+		}
+		if (event.shiftKey && document.activeElement === focusable[0]) {
+			event.preventDefault();
+			focusable[focusable.length - 1].focus();
+		} else if (!event.shiftKey && document.activeElement === focusable[focusable.length - 1]) {
+			event.preventDefault();
+			focusable[0].focus();
+		} else if (focusable.indexOf(document.activeElement) === -1) {
+			event.preventDefault();
+			(focusable[event.shiftKey ? focusable.length - 1 : 0]).focus();
 		}
 	});
 

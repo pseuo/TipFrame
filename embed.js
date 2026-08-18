@@ -93,16 +93,28 @@
 		return iframe;
 	}
 
+	function getExpectedOrigin(iframe) {
+		var sandbox = iframe.getAttribute('sandbox');
+
+		if (sandbox && sandbox.indexOf('allow-same-origin') === -1) return 'null';
+		return new URL(iframe.src).origin;
+	}
+
 	function mount(container, scriptOptions) {
 		var options = mergeOptions(scriptOptions, readOptions(container));
 		var iframe = createIframe(container, options);
+		var expectedOrigin = getExpectedOrigin(iframe);
 
 		window.addEventListener('message', function (event) {
 			if (!event.data || event.data.type !== 'tipframe:resize') return;
 			if (event.source !== iframe.contentWindow) return;
-			if (!event.data.height || event.data.height < 1) return;
+			if (event.origin !== expectedOrigin) return;
+			if (!Number.isFinite(event.data.height) || event.data.height < 40 || event.data.height > 1000) return;
 
 			iframe.style.height = Math.ceil(event.data.height) + 'px';
+		});
+		iframe.addEventListener('load', function () {
+			iframe.contentWindow.postMessage({ type: 'tipframe:request-resize' }, new URL(iframe.src).origin);
 		});
 	}
 

@@ -1,0 +1,16 @@
+{
+  "name": "tipframe",
+  "version": "2.0.0",
+  "private": true,
+  "description": "A static donation and sponsorship widget.",
+  "scripts": {
+    "check:js": "node --check config.js && node --check donate.js && node --check embed.js && node --check version.js && node --check scripts/check-version.js",
+    "check:version": "node scripts/check-version.js",
+    "check:html": "html-validate index.html profiles/index.html profiles/*/index.html",
+    "test:smoke": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "html-validate": "^9.0.0"
+  }
+}

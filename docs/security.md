@@ -1,12 +1,12 @@
-# Security Notes
+# 安全说明
 
-## Static Only
+## 纯静态实现
 
-TipFrame is static and does not collect, store, or upload visitor data by itself.
+TipFrame 是静态页面，本身不会收集、存储或上传访客数据。
 
-## URL Overrides
+## URL 覆盖
 
-For public deployments, you can disable URL-based text/payment/profile overrides:
+对于公开部署，可禁用基于 URL 的文案/支付方式/profile 覆盖：
 
 ```js
 security: {
@@ -14,9 +14,9 @@ security: {
 }
 ```
 
-When disabled, URL parameters such as `title`, `desc`, `methods`, and `profile` are ignored. Display-only parameters such as `theme`, `style`, `type`, `size`, `layout`, `motion`, and `noindex` still work.
+禁用后，`title`、`desc`、`methods` 和 `profile` 等 URL 参数会被忽略。`theme`、`style`、`type`、`size`、`layout` 和 `motion` 等展示参数仍然有效；`noindex` 仍可控制 robots 元数据。
 
-## Locked Profile
+## 锁定 Profile
 
 ```js
 security: {
@@ -24,11 +24,11 @@ security: {
 }
 ```
 
-This forces a profile and ignores `?profile=`.
+此设置会强制使用一个 profile 并忽略 `?profile=`。
 
 ## noindex
 
-Use either config:
+可使用配置：
 
 ```js
 seo: {
@@ -36,12 +36,12 @@ seo: {
 }
 ```
 
-Or URL:
+或使用 URL：
 
 ```text
 ?noindex=1
 ```
 
-## URL Text Safety
+## URL 文本安全
 
-Supported URL text parameters are written with `textContent`, not `innerHTML`.
+可见 UI 文案使用 `textContent` 写入，而不是 `innerHTML`。浏览器标题和元数据通过 DOM 属性设置，也不会作为 HTML 解析。

@@ -1,30 +1,30 @@
-# Security Policy
+# 安全策略
 
-## Data Collection
+## 数据收集
 
-TipFrame is a static frontend-only widget. It does not include a backend service and does not actively collect, store, or upload visitor data.
+TipFrame 是纯静态前端组件，不包含后端服务，也不会主动收集、存储或上传访客数据。
 
-Payment links such as PayPal open third-party platforms. Those platforms may process access or payment data according to their own privacy policies. If QR images are hosted on a CDN, object storage, or another third-party service, that service may keep request logs.
+PayPal 等支付链接会打开第三方平台。这些平台可能依其隐私政策处理访问或支付数据。如果二维码图片托管在 CDN、对象存储或其他第三方服务上，该服务可能保留请求日志。
 
-## URL Parameter Safety
+## URL 参数安全
 
-Supported URL parameters are handled through an allowlist. Text values are written with `textContent` and are not executed as HTML or JavaScript.
+受支持的 URL 参数通过允许列表处理。可见 UI 文案使用 `textContent` 写入；浏览器标题和分享元数据通过 DOM 属性设置，均不会作为 HTML 或 JavaScript 执行。
 
-Do not extend the project by writing user-controlled URL values into `innerHTML` unless you add explicit sanitization.
+除非加入明确的净化处理，否则不要将用户可控的 URL 值写入 `innerHTML` 来扩展项目。
 
-## Payment QR Codes
+## 收款二维码
 
-Do not commit real personal payment QR codes to a public repository unless you intentionally want them to be public.
+除非有意公开，否则不要将真实的个人收款二维码提交到公开仓库。
 
-When sharing a public demo, prefer placeholder QR codes or clearly documented test images.
+分享公开演示时，请优先使用占位二维码或有明确说明的测试图片。
 
-## Reporting a Security Issue
+## 报告安全问题
 
-If you find a security issue, please open a private report through the repository hosting platform if available. If private reporting is not available, contact the maintainer directly before publishing details.
+如果发现安全问题，请优先通过仓库托管平台的私密报告渠道提交。如果平台不支持私密报告，请在公开细节前直接联系维护者。
 
-Please include:
+请提供：
 
-- A short description of the issue.
-- Steps to reproduce.
-- Affected files or URLs.
-- Any suggested mitigation.
+- 问题的简要描述。
+- 复现步骤。
+- 受影响的文件或 URL。
+- 建议的缓解措施。

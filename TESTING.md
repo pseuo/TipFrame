@@ -1,14 +1,14 @@
-# Manual Testing Checklist
+# 手动测试清单
 
-Run the page with a local static server first:
+请先使用本地静态服务器运行页面：
 
 ```bash
 python -m http.server 8000
 ```
 
-Then open `http://localhost:8000/` and test the following URLs.
+然后打开 `http://localhost:8000/` 并测试以下 URL。
 
-## Display Parameters
+## 展示参数
 
 - `/?theme=dark`
 - `/?style=minimal`
@@ -21,52 +21,57 @@ Then open `http://localhost:8000/` and test the following URLs.
 - `/?layout=vertical&type=card`
 - `/?theme=dark&style=minimal&type=card&size=sm&methods=wechat`
 
-## Embed Parameters
+## 嵌入参数
 
 - `/?embed=1&type=compact`
 - `/?embed=1&type=full`
 - `/?embed=1&type=card&style=minimal`
 
-## Default Open
+## 默认打开
 
 - `/?open=wechat`
 - `/?open=alipay`
 - `/?methods=wechat&open=wechat`
 
-Expected result: the matching QR modal opens automatically when the QR image is available.
+预期结果：二维码图片可用时，对应的二维码弹窗会自动打开。
 
-## Profiles
+## 项目配置
 
 - `/?profile=projectA`
 - `/?profile=projectB&methods=wechat`
 - `/?profile=projectA&open=wechat`
 
-Expected result: the selected profile overrides page text and payment settings from `config.js`.
+预期结果：选定的 profile 会覆盖 `config.js` 中的页面文案和支付设置。
 
-## QR Error State
+打开 `profiles/projectA/` 和 `profiles/projectB/`。
 
-Temporarily change one QR path in `config.js` to a missing image, for example:
+预期结果：公开 profile 入口展示静态页面元数据，并加载同一个共享支付组件。
+
+## 二维码错误状态
+
+临时将 `config.js` 中的一个二维码路径改为不存在的图片，例如：
 
 ```js
 qr: './images/missing-qr.jpg'
 ```
 
-Expected result: the corresponding payment button becomes disabled and displays `不可用` before the modal opens.
+预期结果：弹窗打开前，对应支付按钮会被禁用并显示 `不可用`。
 
-## Embed Script
+## Profile 入口
 
-Open `examples/embed.html`.
+打开 `profiles/`。
 
-Open `examples/broken-qr.html`.
+打开 `profiles/projectA/` 和 `profiles/projectB/`。
 
-Open `examples/vertical.html`.
+打开 `profiles/brokenQr/`。
 
-Open `examples/url-lock.html`.
+打开 `profiles/lockedDemo/`。
 
-Expected result:
+预期结果：
 
-- Default instance renders.
-- WeChat-only instance renders.
-- Card instance renders.
-- Minimal instance renders.
-- Each iframe auto-resizes without scrollbars.
+- profile 目录链接到每个公开 profile。
+- JavaScript 执行前即可获得公开 profile 的元数据。
+- 共享支付组件在每个 profile iframe 内渲染。
+- 二维码损坏的 profile 会禁用无效支付方式。
+- 锁定的 profile 会忽略 URL 覆盖。
+- 每个 profile iframe 都会自动调整高度且不显示滚动条。

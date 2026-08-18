@@ -27,10 +27,72 @@ window.TipFrameConfig = {
 	},
 	security: {
 		allowUrlOverrides: true,
-		lockedProfile: ''
+		lockedProfile: '',
+		parentOrigin: ''
 	},
 	seo: {
 		robots: 'index,follow'
+	},
+	i18n: {
+		'zh-CN': {
+			labels: {
+				selectMethod: '选择一种方式',
+				safePayment: '安全跳转或扫码完成支付',
+				noMethods: '暂无可用支付方式',
+				buildEmbedCode: '生成嵌入代码',
+				hideEmbedCode: '隐藏嵌入代码',
+				embedBuilder: '生成嵌入代码',
+				theme: '主题',
+				mode: '模式',
+				style: '样式',
+				size: '尺寸',
+				paymentMethods: '支付方式',
+				copy: '复制代码',
+				copied: '已复制',
+				close: '关闭',
+				closeQr: '关闭二维码',
+				qrDialog: '二维码弹窗'
+			}
+		},
+		en: {
+			page: {
+				documentTitle: 'TipFrame',
+				eyebrow: 'TipFrame',
+				title: 'If this project helped you',
+				description: 'You can support ongoing maintenance in your preferred way.',
+				shareImage: './images/like.svg'
+			},
+			modal: {
+				eyebrow: 'Scan to support',
+				hintMobile: 'Long press to save the QR code',
+				hintDesktop: 'Right click to save the QR code',
+				caption: 'Click outside or press Esc to close',
+				error: 'Image failed to load. Check the QR code path.',
+				unavailable: 'Unavailable'
+			},
+			themeLabels: {
+				light: 'Dark mode',
+				dark: 'Light mode'
+			},
+			labels: {
+				selectMethod: 'Choose a payment method',
+				safePayment: 'Continue securely or scan a QR code to pay',
+				noMethods: 'No payment methods are currently available.',
+				buildEmbedCode: 'Generate embed code',
+				hideEmbedCode: 'Hide embed code',
+				embedBuilder: 'Generate embed code',
+				theme: 'Theme',
+				mode: 'Mode',
+				style: 'Style',
+				size: 'Size',
+				paymentMethods: 'Payment methods',
+				copy: 'Copy code',
+				copied: 'Copied',
+				close: 'Close',
+				closeQr: 'Close QR code',
+				qrDialog: 'QR code dialog'
+			}
+		}
 	},
 	payments: {
 		paypal: {
@@ -108,7 +170,7 @@ window.TipFrameConfig = {
 				description: '这个 profile 用于测试二维码图片路径错误时的禁用状态。'
 			},
 			display: {
-				methods: ['wechat']
+				methods: ['alipay', 'wechat']
 			},
 			payments: {
 				wechat: {

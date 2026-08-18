@@ -1,38 +1,38 @@
-# Contributing
+# 贡献指南
 
-Thanks for helping improve TipFrame.
+感谢你帮助改进 TipFrame。
 
-## Local Preview
+## 本地预览
 
-Use any static server from the project root.
+在项目根目录使用任意静态服务器。
 
 ```bash
 python -m http.server 8000
 ```
 
-Then open:
+然后打开：
 
 ```text
 http://localhost:8000/
 ```
 
-You can also use Node:
+也可以使用 Node：
 
 ```bash
 npx serve .
 ```
 
-## Check Scripts
+## 检查脚本
 
-Before submitting changes, run syntax checks:
+提交改动前，请运行项目检查：
 
 ```bash
-node --check donate.js
-node --check embed.js
-node --check config.js
+npm run check:js
+npm run check:version
+npm run check:html
 ```
 
-Also check example configs if you touched them:
+如果修改了示例配置，也请检查：
 
 ```bash
 node --check config.example.js
@@ -40,45 +40,45 @@ node --check config.zh-CN.example.js
 node --check config.en.example.js
 ```
 
-## Change Configuration
+## 修改配置
 
-User-facing configuration belongs in `config.js` or one of the example config files.
+面向用户的配置应放在 `config.js` 或某个示例配置文件中。
 
-Common areas:
+常用配置项：
 
-- `page`: document title, heading, description, share image.
-- `modal`: QR modal text and error messages.
-- `theme`: accent color.
-- `display`: mode, style, layout, size, method order.
-- `security`: URL override and profile lock behavior.
-- `seo`: robots behavior.
-- `payments`: payment links, QR images, labels, icons, colors.
-- `profiles`: reusable project/recipient profiles.
+- `page`：浏览器标题、页面标题、说明和分享图片。
+- `modal`：二维码弹窗文案和错误信息。
+- `theme`：强调色。
+- `display`：模式、样式、布局、尺寸和支付方式顺序。
+- `security`：URL 覆盖和 profile 锁定行为。
+- `seo`：robots 行为。
+- `payments`：支付链接、二维码图片、标签、图标和颜色。
+- `profiles`：可复用的项目/收款人 profile。
 
-Avoid hard-coding user-specific payment details in `donate.js`.
+避免在 `donate.js` 中硬编码用户专属的收款信息。
 
-## Add a URL Parameter
+## 新增 URL 参数
 
-When adding a new URL parameter:
+新增 URL 参数时：
 
-1. Add parsing logic in `donate.js`.
-2. Add it to the allowlist in `embed.js` if it should work with `data-*` embedding.
-3. Document it in `docs/parameters.md`.
-4. Add a manual test case to `TESTING.md`.
-5. Prefer writing text with `textContent`, not `innerHTML`.
+1. 在 `donate.js` 中添加解析逻辑。
+2. 如果该参数应支持 `data-*` 嵌入，请将其加入 `embed.js` 的允许列表。
+3. 在 `docs/parameters.md` 中记录该参数。
+4. 在 `TESTING.md` 中添加手动测试用例。
+5. 优先使用 `textContent` 写入文本，不要使用 `innerHTML`。
 
-If the parameter can affect payment links, QR paths, or visible text, consider whether it should respect `security.allowUrlOverrides`.
+如果该参数会影响支付链接、二维码路径或可见文案，请考虑它是否应遵守 `security.allowUrlOverrides`。
 
-## Add an Example
+## 新增 Profile
 
-Put standalone examples in `examples/`.
+将稳定的项目或收款人入口放在 `profiles/<name>/index.html`，并在 `profiles/index.html` 链接公开入口。
 
-Use relative paths like `../index.html` and `../embed.js` so examples work locally and after static deployment.
+使用指向共享根目录的相对路径，例如 `../../index.html`，确保 profile 入口在本地和静态部署后都能正常工作。
 
-## Style Guidelines
+## 编码约定
 
-- Keep the project dependency-free.
-- Prefer small, focused changes.
-- Keep static hosting compatibility.
-- Keep public configuration in `config.js`.
-- Do not commit real personal QR codes unless they are intentionally public.
+- 保持运行时无依赖；新增开发依赖应有明确的质量或维护理由。
+- 优先进行小而聚焦的改动。
+- 保持静态托管兼容性。
+- 将公开配置保留在 `config.js` 中。
+- 除非有意公开，否则不要提交真实的个人收款二维码。
